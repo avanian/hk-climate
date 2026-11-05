@@ -14,7 +14,7 @@
     "dev:cron": "wrangler dev --test-scheduled",
     "seed": "curl -fsS http://localhost:8787/api/refresh",
     "test": "node --test",
-    "check": "node --check src/index.js && node --check src/hko.js && node --check site/app.js",
+    "check": "node --check src/index.js && node --check src/hko.js && node --check site/app.js && node --check site/reference.js",
     "build:dry": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
     "kv:create": "wrangler kv namespace create TEMPS"
