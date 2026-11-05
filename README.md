@@ -96,7 +96,7 @@ dispatch) using `cloudflare/wrangler-action`. Configure these in
 | `CLOUDFLARE_ACCOUNT_ID` | secret | Your Cloudflare account id |
 | `REFRESH_TOKEN` | secret | Any long random string (guards `/api/refresh`) |
 | `KV_NAMESPACE_ID` | variable | The `TEMPS` namespace id (optional; see above) |
-| `SITE_URL` | variable | Public Worker URL, e.g. `https://hk-temperatures.<subdomain>.workers.dev` |
+| `SITE_URL` | variable | Public Worker URL, e.g. `https://hk-climate.<subdomain>.workers.dev` |
 
 After deploying, the workflow calls `POST /api/refresh` so the KV cache is warm
 immediately. The `Refresh data` workflow does the same on demand.

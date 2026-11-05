@@ -19,7 +19,7 @@ const HOT_THRESHOLD = 30;
 const DEFAULT_EXTRA_YEARS = 10;
 
 async function getJSON(url) {
-  const resp = await fetch(url, { headers: { "user-agent": "hk-temperatures-worker" } });
+  const resp = await fetch(url, { headers: { "user-agent": "hk-climate-worker" } });
   if (!resp.ok) throw new Error(`HTTP ${resp.status} for ${url}`);
   return JSON.parse(await resp.text());
 }
