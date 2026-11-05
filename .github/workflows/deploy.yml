@@ -41,7 +41,8 @@ jobs:
 
       - name: Inject KV namespace id
         env:
-          KV_NAMESPACE_ID: ${{ vars.KV_NAMESPACE_ID }}
+          # Accept it as either a variable or a secret (variables are tidier).
+          KV_NAMESPACE_ID: ${{ vars.KV_NAMESPACE_ID || secrets.KV_NAMESPACE_ID }}
         run: |
           if [ -n "$KV_NAMESPACE_ID" ]; then
             sed -i "s|REPLACE_WITH_KV_NAMESPACE_ID|$KV_NAMESPACE_ID|g" wrangler.toml
@@ -70,7 +71,7 @@ jobs:
 
       - name: Warm the KV cache
         env:
-          SITE_URL: ${{ vars.SITE_URL }}
+          SITE_URL: ${{ vars.SITE_URL || secrets.SITE_URL }}
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
         run: |
           if [ -n "$SITE_URL" ] && [ -n "$REFRESH_TOKEN" ]; then
