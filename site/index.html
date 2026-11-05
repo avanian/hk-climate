@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hong Kong seasonal temperatures</title>
+<link rel="stylesheet" href="style.css">
+<script src="vendor/d3.min.js"></script>
+<script src="vendor/plot.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Hong Kong seasonal temperatures</h1>
+    <p>Daily mean, maximum and minimum air temperature at the Hong Kong Observatory.</p>
+    <p class="meta" id="meta">Loading…</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="controls" id="controls">
+    <div class="field">
+      <label for="from-year">Show years from</label>
+      <input type="range" id="from-year" min="1884" max="2026" step="1" value="1980">
+      <output id="from-year-out">1980</output>
+    </div>
+
+    <div class="field">
+      <label for="metric">Metric</label>
+      <span class="help" tabindex="0" role="img" aria-label="What does metric mean?">?<span class="tip">Which daily series to draw: <b>Mean</b> is the day's average temperature, <b>Maximum</b> and <b>Minimum</b> are the day's highest and lowest readings. Affects the “Daily curves by year” and “Daily temperature heatmap” charts.</span></span>
+      <select id="metric">
+        <option value="mean" selected>Mean</option>
+        <option value="max">Maximum</option>
+        <option value="min">Minimum</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Reference period</label>
+      <span class="help" tabindex="0" role="img" aria-label="What is the reference period?">?<span class="tip">The baseline window used for normals and anomalies. <b>1991–2020</b> is the current HKO climatological normal period.</span></span>
+      <span class="slider-wrap">
+        <span class="slider-track"></span>
+        <span class="slider-fill" id="ref-fill"></span>
+        <input type="range" id="ref-start" min="1884" max="2026" step="1" value="1991" aria-label="Reference period start year">
+        <input type="range" id="ref-end" min="1884" max="2026" step="1" value="2020" aria-label="Reference period end year">
+      </span>
+      <output id="ref-out">1991–2020</output>
+    </div>
+
+    <div class="field">
+      <label><input type="checkbox" id="show-range" checked> Show daily max–min for this year</label>
+    </div>
+
+    <button id="refresh" hidden>Rebuild data</button>
+  </section>
+  <p class="ref-note" id="ref-note"></p>
+
+  <nav class="tabs" role="tablist" aria-label="Chart views">
+    <button class="tab active" type="button" data-tab="summary" role="tab" aria-selected="true">Summary</button>
+    <button class="tab" type="button" data-tab="years" role="tab" aria-selected="false">Daily curves by year</button>
+  </nav>
+
+  <div id="error" class="error" hidden></div>
+
+  <section class="tab-panel" id="panel-summary" role="tabpanel">
+    <h2><span id="current-title">Latest year vs the reference normal</span> <span class="help" tabindex="0" role="img" aria-label="About this chart">?<span class="tip">Daily mean temperature for the latest year (red) against the chosen reference period. Grey bands are ±1σ and ±2σ of daily values in that period; the coral band is the latest year's daily max–min range.</span></span></h2>
+    <div class="chart" id="chart-current"></div>
+
+    <h2>Warming stripes <span class="help" tabindex="0" role="img" aria-label="About this chart">?<span class="tip">One stripe per year, coloured by the annual mean temperature minus the reference-period average. Blue is cooler, red is warmer than the baseline.</span></span></h2>
+    <div class="chart" id="chart-stripes"></div>
+
+    <h2><span id="monthly-title">Monthly temperature anomaly</span> <span class="help" tabindex="0" role="img" aria-label="About this chart">?<span class="tip">Each cell is that month's average daily mean minus the same calendar month's average over the reference period — a difference of monthly averages. Red means warmer than normal.</span></span></h2>
+    <div class="chart" id="chart-monthly"></div>
+
+    <h2>Daily temperature heatmap <span class="help" tabindex="0" role="img" aria-label="About this chart">?<span class="tip">One row per year and one column per day; colour is the selected metric. The month slider narrows the part of the year shown.</span></span></h2>
+    <div class="chart-controls">
+      <span>Months</span>
+      <span class="slider-wrap">
+        <span class="slider-track"></span>
+        <span class="slider-fill" id="hm-fill"></span>
+        <input type="range" id="hm-start" min="1" max="12" step="1" value="1" aria-label="Heatmap first month">
+        <input type="range" id="hm-end" min="1" max="12" step="1" value="12" aria-label="Heatmap last month">
+      </span>
+      <output id="hm-out">Jan–Dec</output>
+    </div>
+    <div class="chart" id="chart-heatmap"></div>
+
+    <h2>Very hot days per year <span class="help" tabindex="0" role="img" aria-label="About this chart">?<span class="tip">Number of days each year with a maximum temperature of at least 30 °C. The dashed line is a least-squares linear trend.</span></span></h2>
+    <div class="chart" id="chart-hot"></div>
+  </section>
+
+  <section class="tab-panel" id="panel-years" role="tabpanel" hidden>
+    <h2>Daily curves by year <span class="help" tabindex="0" role="img" aria-label="About this chart">?<span class="tip">Every year's daily series overlaid on a common calendar; newer years are thicker and more opaque. Dense, but useful for comparing seasonal timing.</span></span></h2>
+    <div class="chart" id="chart-overlay"></div>
+  </section>
+</main>
+
+<footer class="wrap">
+  Data: Hong Kong Observatory Open Data and
+  <code>hko.gov.hk/cis/dailyExtract</code>. The current month is month-to-date.
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

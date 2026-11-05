@@ -1,0 +1,22 @@
+name = "hk-temperatures"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Static front-end (plain HTML/CSS/JS, Observable Plot vendored locally).
+[assets]
+directory = "./site"
+binding = "ASSETS"
+
+# Daily refresh: 22:00 UTC = 06:00 HKT, after HKO's morning update.
+[triggers]
+crons = ["0 22 * * *"]
+
+[observability]
+enabled = true
+
+# One-time setup: `pnpm kv:create`, then set the returned id here (local dev
+# simulates KV automatically). CI can instead inject it from the repository
+# variable KV_NAMESPACE_ID, leaving the placeholder below in the committed file.
+[[kv_namespaces]]
+binding = "TEMPS"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"

@@ -1,0 +1,68 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Workers
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Inject KV namespace id
+        env:
+          KV_NAMESPACE_ID: ${{ vars.KV_NAMESPACE_ID }}
+        run: |
+          if [ -n "$KV_NAMESPACE_ID" ]; then
+            sed -i "s|REPLACE_WITH_KV_NAMESPACE_ID|$KV_NAMESPACE_ID|g" wrangler.toml
+            echo "Injected KV namespace id from KV_NAMESPACE_ID."
+          else
+            echo "::warning::KV_NAMESPACE_ID is not set; deploying with the placeholder id."
+          fi
+
+      - name: Publish
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: pnpm
+          command: deploy
+
+      - name: Warm the KV cache
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+        run: |
+          if [ -n "$SITE_URL" ] && [ -n "$REFRESH_TOKEN" ]; then
+            curl -fsS -X POST "$SITE_URL/api/refresh" \
+              -H "Authorization: Bearer $REFRESH_TOKEN"
+          else
+            echo "SITE_URL or REFRESH_TOKEN not set; skipping cache warm-up."
+          fi

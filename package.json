@@ -1,0 +1,25 @@
+{
+  "name": "hk-climate",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Interactive Hong Kong Observatory seasonal temperature dashboard on Cloudflare Workers.",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@12.15.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "dev:cron": "wrangler dev --test-scheduled",
+    "seed": "curl -fsS http://localhost:8787/api/refresh",
+    "test": "node --test",
+    "check": "node --check src/index.js && node --check src/hko.js && node --check site/app.js",
+    "build:dry": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "kv:create": "wrangler kv namespace create TEMPS"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
