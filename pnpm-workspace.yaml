@@ -1,0 +1,7 @@
+# pnpm 12 blocks dependency build scripts unless they are explicitly approved.
+# These two need their postinstall scripts to fetch/link native binaries:
+#   esbuild -> bundles the Worker (used by wrangler)
+#   workerd -> the Workers runtime used by `wrangler dev` / miniflare
+allowBuilds:
+  esbuild: true
+  workerd: true
