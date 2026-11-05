@@ -87,8 +87,11 @@ Other scripts:
 ### Continuous deployment
 
 `.github/workflows/deploy.yml` deploys on every push to `main` (and on manual
-dispatch) using `cloudflare/wrangler-action`. Configure these in
-**Settings → Secrets and variables → Actions**:
+dispatch) with `pnpm exec wrangler deploy`. The workflows use only GitHub-owned
+actions, each pinned to a full commit SHA (this repository requires SHA
+pinning), plus a small shell step to install the pnpm version from
+`packageManager`. Configure these in **Settings → Secrets and variables →
+Actions**:
 
 | Name | Kind | Value |
 | --- | --- | --- |

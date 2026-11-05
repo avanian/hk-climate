@@ -18,16 +18,19 @@ jobs:
     name: Test & validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Actions are pinned to full commit SHAs: this repo requires SHA pinning
+      # and allows GitHub-owned actions. Keep the trailing version comments so
+      # Dependabot can bump the pins.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+
+      - name: Install pnpm
+        run: |
+          PNPM_VERSION="$(node -p 'require("./package.json").packageManager')"
+          npm install -g "$PNPM_VERSION"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
