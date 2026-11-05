@@ -16,7 +16,7 @@ concurrency:
 jobs:
   test:
     name: Test & validate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       # Actions are pinned to full commit SHAs: this repo requires SHA pinning
       # and allows GitHub-owned actions. Keep the trailing version comments so

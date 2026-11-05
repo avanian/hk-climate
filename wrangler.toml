@@ -2,6 +2,12 @@ name = "hk-climate"
 main = "src/index.js"
 compatibility_date = "2025-01-01"
 
+# Custom domain, managed by Wrangler. Requires the zone to be in the account
+# and the API token to have Zone → Workers Routes: Edit.
+routes = [
+  { pattern = "hk-climate.avanian.net", custom_domain = true }
+]
+
 # Static front-end (plain HTML/CSS/JS, Observable Plot vendored locally).
 [assets]
 directory = "./site"
