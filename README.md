@@ -29,7 +29,9 @@ wrangler.toml    assets + cron + KV bindings
   month-to-date). Despite the `.xml` extension these endpoints return JSON.
 
 The two sources agree numerically; the Daily Extract just publishes the current
-month earlier. The current month is therefore month-to-date.
+month earlier. The current month is therefore month-to-date. Charts compare a
+part-year or part-month with the same part of the reference period, so a year
+still in progress is not measured against full reference years.
 
 ## Local development
 

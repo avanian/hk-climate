@@ -2,6 +2,8 @@
 // Each chart renders at its container's real pixel width so it fills the card,
 // and re-renders on resize (ResizeObserver) or when controls change.
 
+import { computeReference, mean } from "./reference.js";
+
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -24,20 +26,6 @@ const state = {
   heatmapStart: 1,
   heatmapEnd: 12,
 };
-
-function mean(values) {
-  let sum = 0;
-  let n = 0;
-  for (const v of values) if (v != null) { sum += v; n += 1; }
-  return n ? sum / n : null;
-}
-
-function std(values, m) {
-  let sum = 0;
-  let n = 0;
-  for (const v of values) if (v != null) { sum += (v - m) ** 2; n += 1; }
-  return n ? Math.sqrt(sum / n) : null;
-}
 
 function linearTrend(xs, ys) {
   const n = xs.length;
@@ -65,44 +53,6 @@ function decadeTicks(start, end) {
   const ticks = [];
   for (let y = Math.ceil(start / 10) * 10; y <= end; y += 10) ticks.push(y);
   return ticks;
-}
-
-// Recompute climatology for an arbitrary reference window, client-side.
-function computeReference(data, start, end) {
-  const meanArr = new Array(366).fill(null);
-  const stdArr = new Array(366).fill(null);
-  for (let i = 0; i < 366; i += 1) {
-    const vals = [];
-    for (let y = start; y <= end; y += 1) {
-      const v = data.years[y]?.mean?.[i];
-      if (v != null) vals.push(v);
-    }
-    if (vals.length) {
-      const m = mean(vals);
-      meanArr[i] = m;
-      stdArr[i] = std(vals, m);
-    }
-  }
-
-  const monthlyNormal = new Array(12).fill(null);
-  for (let mo = 0; mo < 12; mo += 1) {
-    const vals = [];
-    for (let y = start; y <= end; y += 1) {
-      const arr = data.years[y]?.mean;
-      if (!arr) continue;
-      for (let i = 0; i < 366; i += 1) {
-        if (arr[i] != null && doyDate(i + 1).getUTCMonth() === mo) vals.push(arr[i]);
-      }
-    }
-    monthlyNormal[mo] = mean(vals);
-  }
-
-  const annual = [];
-  for (let y = start; y <= end; y += 1) {
-    if (data.annual[y] != null) annual.push(data.annual[y]);
-  }
-
-  return { mean: meanArr, std: stdArr, monthlyNormal, annualMean: mean(annual) };
 }
 
 // --- responsive chart plumbing -------------------------------------------- //
@@ -273,7 +223,11 @@ charts.stripes = (width) => {
   const { data } = state;
   const years = yearsInRange().filter((y) => data.annual[y] != null);
   const base = state.clim?.annualMean ?? mean(years.map((y) => data.annual[y]));
-  const stripes = years.map((y) => ({ year: y, anomaly: data.annual[y] - base }));
+  const currentBase = state.clim?.partialAnnualMean ?? base;
+  const stripes = years.map((y) => ({
+    year: y,
+    anomaly: data.annual[y] - (y === state.maxYear ? currentBase : base),
+  }));
 
   return Plot.plot({
     width,
@@ -323,10 +277,14 @@ charts.monthly = (width) => {
   const { data } = state;
   const ys = yearsInRange();
   const cells = [];
+  const period = state.clim.period;
   for (const y of ys) {
     const vals = data.monthly.values[y] ?? [];
     for (let m = 0; m < 12; m += 1) {
-      const normal = state.clim.monthlyNormal[m];
+      const partMonth = y === state.maxYear && period && m + 1 === period.month;
+      const normal = partMonth
+        ? state.clim.partialMonthlyNormal[m]
+        : state.clim.monthlyNormal[m];
       if (vals[m] != null && normal != null) {
         cells.push({ month: m + 1, year: y, anomaly: vals[m] - normal });
       }
