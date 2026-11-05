@@ -90,27 +90,22 @@ Other scripts:
 dispatch) with `pnpm exec wrangler deploy`. The workflows use only GitHub-owned
 actions, each pinned to a full commit SHA (this repository requires SHA
 pinning), plus a small shell step to install the pnpm version from
-`packageManager`. Configure these in **Settings → Secrets and variables →
-Actions**:
+`packageManager`. All deployment values live on a GitHub **`production`
+environment** (Settings → Environments), so they are only exposed to the
+`Deploy` and `Refresh data` jobs:
 
 | Name | Kind | Value |
 | --- | --- | --- |
-| `CLOUDFLARE_API_TOKEN` | secret | Token with the *Workers Scripts: Edit* permission |
+| `CLOUDFLARE_API_TOKEN` | secret | API token with *Workers Scripts: Edit* and *Workers KV Storage: Edit* |
 | `CLOUDFLARE_ACCOUNT_ID` | secret | Your Cloudflare account id |
 | `REFRESH_TOKEN` | secret | Any long random string (guards `/api/refresh`) |
-| `KV_NAMESPACE_ID` | variable | The `TEMPS` namespace id (optional; see above) |
+| `KV_NAMESPACE_ID` | variable | The `TEMPS` namespace id (from `pnpm kv:create`) |
 | `SITE_URL` | variable | Public Worker URL, e.g. `https://hk-climate.<subdomain>.workers.dev` |
 
-After deploying, the workflow calls `POST /api/refresh` so the KV cache is warm
-immediately. The `Refresh data` workflow does the same on demand.
-
-To guard `/api/refresh` in production, set the token as a Worker secret too:
-
-```bash
-pnpm exec wrangler secret put REFRESH_TOKEN
-```
-
-Requests from localhost are always allowed; elsewhere the route requires
+After deploying, the workflow pushes `REFRESH_TOKEN` to the Worker as a secret
+and calls `POST /api/refresh` so the KV cache is warm immediately. The
+`Refresh data` workflow does the same on demand. Requests from localhost are
+always allowed; elsewhere the route requires
 `Authorization: Bearer <REFRESH_TOKEN>`.
 
 ## Updating vendored libraries

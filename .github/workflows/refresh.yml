@@ -9,6 +9,8 @@ jobs:
   refresh:
     name: Trigger dataset rebuild
     runs-on: ubuntu-latest
+    environment:
+      name: production
     steps:
       - name: Call /api/refresh
         env:
@@ -16,7 +18,7 @@ jobs:
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
         run: |
           if [ -z "$SITE_URL" ] || [ -z "$REFRESH_TOKEN" ]; then
-            echo "::error::Set the SITE_URL repository variable and REFRESH_TOKEN secret first."
+            echo "::error::Set the SITE_URL variable and REFRESH_TOKEN secret on the production environment first."
             exit 1
           fi
           curl -fsS -X POST "$SITE_URL/api/refresh" \
