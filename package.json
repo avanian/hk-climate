@@ -20,6 +20,6 @@
     "kv:create": "wrangler kv namespace create TEMPS"
   },
   "devDependencies": {
-    "wrangler": "^4.156.1"
+    "wrangler": "^4.158.0"
   }
 }
